@@ -1,30 +1,86 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
+import { FormGroup, FormBuilder } from  '@angular/forms';
+
 import { MazeService } from './maze.service';
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css']
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
     title = 'maze-ga';
 
     public maze: Array<Block> = [];
-    public eltismo: boolean = true;
+    public eltismo: boolean = false;
     public crossover: number = 0.7;
     public mutation: number = 0.3;
-    public populationLength: number = 200;
-    public maxGenerations: number = 100;
-    public solution: string = "0001010100000000";
+    public populationLength: number = 100;
+    public maxGenerations: number = 1000;
+    public solution: string = "000001010100";
     public characters: Array<string> = ["00", "01", "10", "11"];
     public genesTotal: number;
+    public generations: Array<string> = [];
 
-    constructor(private mazeService: MazeService) {
+    public paramsForm: FormGroup;
+
+    constructor(
+        private mazeService: MazeService,
+        private ref: ChangeDetectorRef,
+        private formBuilder: FormBuilder
+    ) {
+        // this.paramsForm = this.formBuilder.group({
+        //     crossover: this.crossover,
+        //     mutation: this.mutation,
+        //     populationLength: this.populationLength,
+        //     maxGenerations: this.maxGenerations
+        // });
+        
         this.genesTotal = this.solution.length / 2;
         this.maze = mazeService.generateMaze();
     }
 
     public ngOnInit(): void {
+        // this.start();
+        console.log('ngOnInit');
+
+        // let hasSolution = false;
+        // let generation = 0;
+
+        // //cria a primeira população aleatória
+        // let population = this.createPopulation(this.genesTotal, this.populationLength);
+
+        // console.log(population);
+
+        // this.ref.detectChanges();
+        // console.log(population.individuos[0]);
+        // this.renderMaze(population.individuos[0]);
+        // this.ref.detectChanges();
+    }
+    public ngAfterViewInit(): void {
+        console.log('ngAfterViewInit');
+        // this.start();
+    }
+
+    public onSubmit(): void {
+        // let crossover = this.crossover.toString();
+        // let newCrossover = crossover.replace(/,/g, '.');
+        // let formatedCrossover = parseInt(newCrossover);
+        // this.crossover = formatedCrossover;
+        
+        // if(this.crossover > 1 || this.crossover < 0){
+        //     this.crossover = 0.7;
+        // }
+
+        // let mutation = this.mutation.toString();
+        // let newmutation = mutation.replace(/,/g, '.');
+        // let formatedmutation = parseInt(newmutation);
+        // this.mutation = formatedmutation;
+        
+        // if(this.mutation > 1 || this.mutation < 0){
+        //     this.mutation = 0.3;
+        // }
+
         this.start();
     }
 
@@ -33,12 +89,24 @@ export class AppComponent {
         let generation = 0;
 
         //cria a primeira população aleatória
+        // let population;
+        this.generations = [];
         let population = this.createPopulation(this.genesTotal, this.populationLength);
 
+        // console.log('populationpopulationpopulation', population);
+
+        // this.ref.detectChanges();
+        // console.log(population.individuos[0]);
+        // this.renderMaze(population.individuos[0]);
+        // this.ref.detectChanges();
+
+
         //verifica se tem a solucao
-        hasSolution = this.verifyHasSolution(population);
+        // hasSolution = this.verifyHasSolutionReal(population.individuos[0]);
 
         while (!hasSolution && generation < this.maxGenerations) {
+            // setTimeout(() => {
+            // }, 0);
             generation++;
 
             //cria nova populacao
@@ -47,20 +115,29 @@ export class AppComponent {
             // console.log('population.individuos', population.individuos);
 
             console.log("Geração " + generation + " | Aptidão: " + population.individuos[0].fitness + " | Melhor: " + population.individuos[0].genes);
+            this.generations.push("Geração " + generation + " | Aptidão: " + population.individuos[0].fitness + " | Melhor: " + population.individuos[0].genes);
 
             //verifica se tem a solucao
             hasSolution = this.verifyHasSolutionReal(population.individuos[0]);
+
+            this.renderMaze(population.individuos[0]);
+            this.ref.detectChanges();
         }
 
         if (generation == this.maxGenerations) {
+            // console.log('population.individuos', population.individuos);
             console.log("Atingiu o número máximo de gerações | " + population.individuos[0].genes + " | Aptidão: " + population.individuos[0].fitness);
+            this.generations.push("Atingiu o número máximo de gerações | " + population.individuos[0].genes + " | Aptidão: " + population.individuos[0].fitness);
         }
 
         if (hasSolution) {
+            // console.log('population.individuos', population.individuos);
             console.log("Encontrado resultado na geração " + generation + " | " + population.individuos[0].genes + " (Aptidão: " + population.individuos[0].fitness + ")");
+            this.generations.push("Encontrado resultado na geração " + generation + " | " + population.individuos[0].genes + " (Aptidão: " + population.individuos[0].fitness + ")");
         }
 
-        console.log(population);
+        this.renderMaze(population.individuos[0]);
+        this.ref.detectChanges();
     }
 
     private verifyHasSolution(population: Population): boolean {
@@ -80,13 +157,19 @@ export class AppComponent {
         let lastField = this.getLastFieldTraveled(individuo);
         let exitField = this.maze[3];
 
-        return individuo.wallsHit == 0 && !individuo.hadImpossibleMove && exitField.id == lastField.id;
+        // console.log('individuo.wallsHit', individuo.wallsHit);
+        // console.log('individuo.hadImpossibleMove', individuo.hadImpossibleMove);
+        // console.log('exitField.id', exitField.id);
+        // console.log('lastField.id', lastField.id);
+
+        return individuo.fitness == 0 && exitField.id == lastField.id;
+        // return individuo.wallsHit == 0 && !individuo.hadImpossibleMove && exitField.id == lastField.id;
     }
 
     private getLastFieldTraveled(individuo: Individuo): Block {
         let maze = this.maze.slice(0, this.maze.length);
         maze.forEach(m => m.current = false);
-        maze[15].current = true;
+        maze[12].current = true;
 
         let currentField = maze.find(m => m.current);
 
@@ -160,14 +243,17 @@ export class AppComponent {
 
     public generateCrossover(individuo1: Individuo, individuo2: Individuo) {
         //sorteia o ponto de corte
-        let pontoCorte1 = this.randomIntFromInterval(0, (individuo1.genes.length / 2) - 2) + 1;
-        let pontoCorte2 = this.randomIntFromInterval(0, (individuo1.genes.length / 2) - 2) + individuo1.genes.length / 2;
+        let pontoCorte1 = this.randomIntFromInterval(0, (individuo1.genes.length / 2) - 2) + 1; // entre 0 e 4
+        let pontoCorte2 = this.randomIntFromInterval(0, (individuo1.genes.length / 2) - 2) + individuo1.genes.length / 2; // entre 0 e 4 MAIS a metade (6) (0 ~10)
+        // console.log('(individuo1.genes.length / 2) - 2', (individuo1.genes.length / 2) - 2);
+        // console.log(pontoCorte1, pontoCorte2);
 
         let children = [];
 
         //pega os genes dos pais
         let parentGene1 = individuo1.genes;
         let parentGene2 = individuo2.genes;
+
 
         //realiza o corte, 
         let childGene1 = parentGene1.substr(0, pontoCorte1);
@@ -194,6 +280,8 @@ export class AppComponent {
             population.individuos[i] = this.createIndividuo(genesTotal);
         }
 
+        // console.log('population', population);
+
         return population;
     }
 
@@ -207,7 +295,6 @@ export class AppComponent {
             individuo.genes = individuo.genes + this.characters[index];
         }
 
-        //this.generateFitness(individuo);
         this.generateFitnessReal(individuo);
 
         return individuo;
@@ -220,22 +307,29 @@ export class AppComponent {
         //se for mutar, cria um gene aleatório
         if (this.randomDoubleFromInterval(0, 100) <= this.mutation) {
             let geneNovo = "";
-            let posAleatoria = this.randomIntFromInterval(0, genes.length / 2);
+            let posAleatoria = this.randomIntFromInterval(0, genes.length);
+            // let posAleatoria = this.randomIntFromInterval(0, genes.length / 2);
+
+            // console.log('TEM MUTACAO', posAleatoria);
 
             if (posAleatoria % 2 != 0) {
                 posAleatoria--;
             }
 
-            if (posAleatoria == 54) {
+            //8 passos x 2 = 16
+            if (posAleatoria == 16) {
                 posAleatoria--;
             }
 
             for (let i = 0; i < genes.length; i++)
             {
+                // console.log('posAleatoria', posAleatoria, i);
                 if (i == posAleatoria + 1) continue;
 
                 if (i == posAleatoria) {
+                    // console.log('antigo GENE', geneNovo);
                     geneNovo = geneNovo + this.characters[this.randomIntFromInterval(0, this.characters.length - 1)];
+                    // console.log('NOOV GENE', geneNovo);
                 }
                 else {
                     geneNovo = geneNovo + genes[i];
@@ -264,20 +358,7 @@ export class AppComponent {
             m.current = false;
         });
 
-        this.maze[15].current = true;
-    }
-
-    private generateFitness(individuo: Individuo): void {
-        if(!individuo.fitness) individuo.fitness = 0;
-
-        for (let i = 0; i < this.solution.length; i += 2) {
-            var path = this.solution[i] + this.solution[i + 1];
-            var genesPath = individuo.genes[i] + individuo.genes[i + 1];
-
-            if (path == genesPath) {
-                individuo.fitness++;
-            }
-        }
+        this.maze[12].current = true;
     }
 
     private generateFitnessReal(individuo: Individuo): void {
@@ -289,33 +370,32 @@ export class AppComponent {
         let fieldsTraveled = [];
         let currentField = this.maze.find(m => m.current);
 
-        let verifyMove = (direction: Direction, cantMove: boolean): void => {
+        // console.log('-----------------------------------');
+
+        let verifyMove = (direction: Direction, cantMove: boolean, test: boolean): void => {
             //Verifica se a direção está dentro das possíveis direções do campo atual no labirinto
             if (currentField.possibleDirections.findIndex(d => d == direction) > -1) {
+                // console.log('dentro');
 
-                console.log('cantMove', cantMove);
-                console.log('cantMove', fieldsTraveled.findIndex(f => f.id == currentField.id));
+                // console.log('cantMove', fieldsTraveled.findIndex(f => f.id == currentField.id));
 
                 //Verifica se a parede na direção que ele deseja ir
                 if (cantMove) {
                     // console.log('bate na parede');
-                    individuo.wallsHit++;
+                    individuo.wallsHit += 30;
                 }
 
                 //Verifica o bot já passou por esse campo antes
                 if (fieldsTraveled.findIndex(f => f.id == currentField.id) > -1) {
                     // console.log('andou mesmo caminho');
-                    individuo.repeatedInput++;
-                }
-                else {
-                    // console.log('anda ok');
+                    individuo.repeatedInput += 10;
+                    // individuo.repeatedInput++;
+                } else {
                     fieldsTraveled.push(currentField);
                 }
             } else {
-                //Verifica o bot já passou por esse campo antes
                 if (fieldsTraveled.findIndex(f => f.id == currentField.id) > -1) {
-                    // console.log('ja passou antes');
-                    individuo.repeatedInput++;
+                    individuo.repeatedInput += 10;
                 }
                 else {
                     fieldsTraveled.push(currentField);
@@ -324,25 +404,36 @@ export class AppComponent {
 
                 individuo.fitness -= 100;
                 individuo.hadImpossibleMove = true;
-                // console.log('individuo.fitness', individuo.fitness);
             }
         }
 
+        let moves = [];
         for (let i = 0; i < individuo.genes.length; i += 2) {
             let move = individuo.genes[i] + individuo.genes[i + 1];
 
+            // console.log('move', move, move);
+            let test = false;
+
+            if((individuo.genes.length-2) == i){
+                test = true;
+            }
+
             switch (move) {
                 case Direction.Left:
-                    verifyMove(move, currentField.wallLeft);
+                    verifyMove(move, currentField.wallLeft, test);
+                    moves.push('esquerda');
                     break;
                 case Direction.Top:
-                    verifyMove(move, currentField.wallTop);
+                    verifyMove(move, currentField.wallTop, test);
+                    moves.push('cima');
                     break;
                 case Direction.Right:
-                    verifyMove(move, currentField.wallRight);
+                    moves.push('direita');
+                    verifyMove(move, currentField.wallRight, test);
                     break;
                 case Direction.Bottom:
-                    verifyMove(move, currentField.wallBottom);
+                    moves.push('baixo');
+                    verifyMove(move, currentField.wallBottom, test);
                     break;
             }
 
@@ -351,15 +442,12 @@ export class AppComponent {
 
         individuo.fitness -= individuo.wallsHit;
         individuo.fitness -= individuo.repeatedInput;
+        // console.log('moves', moves);
+        // console.log('individuo.fitness', individuo.fitness);
 
-        this.generatePenalty(individuo, fieldsTraveled);
-    }
+        // this.generatePenalty(individuo, fieldsTraveled);
 
-    private generatePenalty(individuo: Individuo, fieldsTraveled: Array<Block>): void {
-        let penalty = this.maze[3].cordX - fieldsTraveled[fieldsTraveled.length - 1].cordX;
-        penalty += fieldsTraveled[fieldsTraveled.length - 1].cordY - this.maze[3].cordY;
-        
-        individuo.fitness += penalty;
+        // console.log('+++++++++++++++++++++++++++++++++');
     }
 
     private getNextMazeFieldByDirection(maze: Array<Block>, currentField: Block, move: string): Block {
@@ -390,13 +478,28 @@ export class AppComponent {
 
         return maze[oldIndex];
     }
+
+    private renderMaze(individuo: Individuo): void{
+        this.resetCurrent();
+        this.maze.forEach(m => m.active = false);
+
+        let currentField = this.maze.find(m => m.current);
+        currentField.active = true;
+
+        for (let i = 0; i < individuo.genes.length; i += 2) {
+            let move = individuo.genes[i] + individuo.genes[i + 1];
+
+            currentField = this.getNextMazeFieldByDirection(this.maze, currentField, move);
+            currentField.active = true;
+        }
+    }
 }
 
 
 export enum Direction {
-    Left = "00",
+    Right = "00",
     Top = "01",
-    Right = "10",
+    Left = "10",
     Bottom = "11"
 }
 

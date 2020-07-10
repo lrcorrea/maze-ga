@@ -36,6 +36,8 @@ export class MazeService {
             cordY++;
         }
 
+        // console.log('1', this.maze);
+
         //Linha 1
         //Coluna 1
         this.maze[0].wallTop = true;
@@ -105,6 +107,7 @@ export class MazeService {
         //Linha 4
         //Coluna 1
         this.maze[12].wallBottom = true;
+        this.maze[12].current = true;
         this.maze[12].possibleDirections.push(Direction.Right);
         // this.maze[12].possibleDirections.push(Direction.Left);
         this.maze[12].possibleDirections.push(Direction.Top);
@@ -123,6 +126,9 @@ export class MazeService {
         this.maze[15].wallRight = true;
         this.maze[15].possibleDirections.push(Direction.Top);
         this.maze[15].possibleDirections.push(Direction.Left);
+
+        // console.log('this.maze[12]', this.maze[12]);
+        // console.log('2', this.maze);
 
         return this.maze;
     }

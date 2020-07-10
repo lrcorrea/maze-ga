@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+$dark-green: #5e6948;
+$light-purple: #a294c5;
+$white: #ffffff;
+
+.common-limiter{
+    width: 100%;
+    max-width: 1000px;
+    margin: 0px auto;
+    overflow: hidden;
+}
+
+.page-content{
+    padding: 40px;
+
+    .common-limiter{
+        display: flex;
+        justify-content: space-around;
+        // align-items: center;
+        flex-wrap: wrap;
+
+        .debug{
+            width: 100%;
+            margin: -210px auto 0;
+            font-family: 'Roboto', sans-serif;
+
+            p{
+                display: block;
+                font-family: 'Roboto', sans-serif;
+                font-size: 15px;
+            }
+        }
+
+        .maze{
+            width: 500px;
+            height: 500px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 50px);
+
+            .maze-item{
+                width: 100%;
+                height: 100%;
+                border: 0px;
+                // border: 2px solid rgba($color: $dark-green, $alpha: 0.2);
+                // border-right: 0px;
+                // border-bottom: 0px;
+
+                &:nth-child(4n + 0) .block{
+                    border-right: 2px solid rgba($color: $dark-green, $alpha: 0.2);
+                }
+
+                &.border-bottom .block{
+                    border-bottom: 2px solid rgba($color: $dark-green, $alpha: 0.2);
+                }
+
+                &:nth-child(13) .block{
+                    border-left: 0px;
+                }
+
+                &:nth-child(4) .block{
+                    border-right: 0px;
+                }
+
+                .block{
+                    width: 100%;
+                    height: 100%;
+                    border: 2px solid rgba($color: $dark-green, $alpha: 0.2);
+                    border-right: 0px;
+                    border-bottom: 0px;
+                    position: relative;
+                    transition: .2s ease;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    
+                    &.w-left{
+                        border-left-color: #ff0202;
+                        // box-shadow: inset 1px 0 0 #ff0202;
+                    }
+
+                    &.w-right{
+                        border-right-color: #ff0202;
+                        // box-shadow: inset -1px 0 0 #ff0202;
+                    }
+
+                    &.w-top{
+                        border-top-color: #ff0202;
+                        // box-shadow: inset 0 1px 0 0 #ff0202;
+                    }
+
+                    &.w-bottom{
+                        border-bottom-color: #ff0202;
+                        // box-shadow: inset 0 -1px 0 0 #ff0202;
+                    }
+
+                    &.active{
+                        &:after{
+                            content:'';
+                            height: 100%;
+                            width: 100%;
+                            background: rgba($color: #ff0202, $alpha: 0.5);
+                        }
+                    }
+                }
+            }
+        }
+
+        .form{
+            width: 100%;
+            max-width: 580px;
+            display: flex;
+            margin-bottom: 3rem;
+            align-items: flex-end;
+
+            .field{
+                margin-right: 1rem;
+
+                // &:first-child{
+                //     margin-left: 0rem;
+                // }
+
+                .label{
+                    display: block;
+                    font-family: 'Roboto', sans-serif;
+                    font-size: 15px;
+                }
+
+                input{
+                    width: 100%;
+                    max-width: 100%;
+                    height: 30px;
+                    // padding: 0 10px;
+                    font-family: 'Roboto', sans-serif;
+                }
+            }
+
+            button{
+                padding: 9px 15px;
+                cursor: pointer;
+            }
+        }
+    }
+}
